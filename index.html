@@ -19,17 +19,22 @@ h3{font-size:17px;font-weight:600;margin:0 0 6px}
 p{margin:0 0 16px}
 a{color:var(--moss)}
 .button{display:inline-block;background:var(--ink);color:var(--card);text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:500}
+.appicon{display:block;width:96px;height:96px;border-radius:22.5%;margin:0 0 24px;box-shadow:0 1px 2px rgba(41,36,25,.12),0 8px 24px rgba(41,36,25,.10)}
+.meta{font:13px/1.4 ui-monospace,"SF Mono",Menlo,monospace;color:var(--mute);margin:-4px 0 0}
 .badge{display:inline-block;line-height:0}.badge img{display:block;width:162px;height:54px}
 ul{padding-left:20px;margin:0 0 16px}li{margin-bottom:6px}
 footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font:13px/1.6 ui-monospace,"SF Mono",Menlo,monospace;color:var(--mute)}
 footer a{color:var(--mute)}
 </style>
 <title>Stop The Rot</title>
+<link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="Daily limits for the apps and websites that waste your time. When time is up, they're blocked until midnight.">
 </head><body><div class="wrap">
 <nav><a href="./" aria-current="page">Stop The Rot</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
+<img class="appicon" src="app-icon.png" alt="" width="96" height="96">
 <h1>Stop The Rot</h1>
-<p class="lede">Set a daily limit for the apps and websites that eat your day. When it's gone, they're blocked until midnight. No snooze, no override.</p>
+<p class="lede">Set a daily limit for the apps and websites that eat your day. When it's gone, they're blocked until midnight.</p>
 
 <p><a class="badge" id="download" href="https://apps.apple.com/app/id6771123703"><img src="app-store-badge.svg" alt="Download on the App Store" width="162" height="54" onerror="this.parentNode.className='button';this.parentNode.textContent='Download on the App Store'"></a></p>
 <script>
@@ -43,10 +48,11 @@ footer a{color:var(--mute)}
   }
 })();
 </script>
+<p class="meta">Free · iPhone · iOS 26.4 or later</p>
 
 <p class="label">What It Does</p>
 <div class="card"><h3>Group Daily Limit</h3><p>One shared daily allowance across the apps and websites you choose, with warnings 10 and 5 minutes before the block.</p></div>
-<div class="card"><h3>Specific Daily Limits</h3><p>Give your worst offenders their own smaller allowance, taken out of your Group Daily Limit.</p></div>
+<div class="card"><h3>Specific Daily Limits</h3><p>Give your worst offenders a daily allowance of their own.</p></div>
 <div class="card"><h3>Blocked Hours</h3><p>Block apps outright during the hours you want to protect, whatever your limits say.</p></div>
 <div class="card"><h3>Daily Goals</h3><p>Set time you want to spend in apps that are good for you, like reading or meditation.</p></div>
 <div class="card"><h3>Patterns</h3><p>See when you use your phone most, how often you pick it up, and which apps interrupt you.</p></div>
