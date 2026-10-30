@@ -20,9 +20,8 @@ p{margin:0 0 16px}
 a{color:var(--moss)}
 .button{display:inline-block;background:var(--ink);color:var(--card);text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:500}
 .appicon{display:block;width:96px;height:96px;border-radius:22.5%;margin:0 0 24px;box-shadow:0 1px 2px rgba(41,36,25,.12),0 8px 24px rgba(41,36,25,.10)}
-.meta{font:13px/1.4 ui-monospace,"SF Mono",Menlo,monospace;color:var(--mute);margin:-4px 0 0}
 .lede,.tagline{text-wrap:balance}
-.tagline{margin:-16px 0 28px}
+.tagline{font:13px/1.4 ui-monospace,"SF Mono",Menlo,monospace;color:var(--mute);margin:-16px 0 28px}
 .badge{display:inline-block;line-height:0}.badge img{display:block;width:162px;height:54px}
 ul{padding-left:20px;margin:0 0 16px}li{margin-bottom:6px}
 footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);font:13px/1.6 ui-monospace,"SF Mono",Menlo,monospace;color:var(--mute)}
@@ -34,10 +33,74 @@ footer a{color:var(--mute)}
 <meta name="description" content="Daily limits for the apps and websites that waste your time. When time is up, they're blocked until midnight.">
 </head><body><div class="wrap">
 <nav><a href="./" aria-current="page">Stop The Rot</a><a href="support.html">Support</a><a href="privacy.html">Privacy</a></nav>
-<img class="appicon" src="app-icon.png" alt="" width="96" height="96">
+<img class="appicon" id="appicon" src="app-icon.png" alt="" width="96" height="96">
+<script>
+(function () {
+  // Fills the icon's ring once the page has loaded. Draws the icon with an empty ring, then
+  // reveals the real icon (app-icon.png) along the ring with a round cap at the leading edge.
+  // With reduced motion or no canvas, the static icon stays as it is.
+  var img = document.getElementById("appicon");
+  var canvas = document.createElement("canvas");
+  if (!canvas.getContext || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  var dpr = Math.min(window.devicePixelRatio || 1, 3), S = Math.round(96 * dpr);
+  canvas.width = canvas.height = S;
+  canvas.className = "appicon"; canvas.setAttribute("aria-hidden", "true");
+  var ctx = canvas.getContext("2d");
+  // Ring geometry in the 1024px icon: centre 511.5, middle radius 348, width 92. Arc runs
+  // clockwise from 12 o'clock for three quarters of a turn.
+  var k = S / 1024, C = 511.5 * k, R = 348 * k, HALF = 46.5 * k, A0 = -Math.PI / 2, END = 0.75;
+  // Ring colour every 0.005 of a turn, sampled from app-icon.png.
+  var COLOURS = "7e8b627e8b627e8b627e8b627e8b6299a17c9aa27d828f658290668390669ba37d84916785926885926985936986936a8f9b7287946b87956b89976da0a783a1a88489976d8a986e8b986ea2a9858c996f8c9a708d9a70a3ab86a4ab878e9c728f9c728f9d7398a37c909e74919e75919f7593a07792a076a6ae8a93a17794a27894a278a9b18ca8b08ca1ac8596a47a97a57b97a57b98a67c98a67c99a77d99a77da6b089adb590adb5909ba97f9caa809caa80afb7929dab819eac829eac829fad839fad83a7b28aa0ae84a1af85a2af86b3bb96b3bb96a3b187a3b187a4b288b4bc97a5b389a5b389a6b48ab6be99b7bf9aa7b58ba8b68ca8b68cafba92a9b78daab88eabb78dadb78eadb68dbbbf9bafb58db0b58db1b48cbebd9abfbd9abbb995b4b28cb5b28cb6b18bb7b18bb8b08bb9b08bbaaf8bc2b694c7b999c7b998bead8abfad8ac0ac8acab799c1ab8ac2ab89c3aa89c4aa89c5a989c8ad8fc7a889c8a888c9a889d1b498d2b498cca688cda588cea587d4b297cfa487d0a387d1a387d7b097d8b196d4a186d5a186d6a086d8a68cd79f86d89f85d99e85da9f86db9d85dfac95db9c84da9a83d99981dca891dca890d49179d49179d49179d49179d49179";
+  function colourAt(f) {
+    var i = Math.min(150, Math.max(0, Math.round(f / 0.005)));
+    return "#" + COLOURS.substr(i * 6, 6);
+  }
+  var empty = new Image(), full = new Image(), loaded = 0;
+  empty.onload = full.onload = function () { if (++loaded === 2) ready(); };
+  empty.src = "app-icon-empty.png"; full.src = img.currentSrc || img.src;
+
+  function draw(fill) {
+    ctx.clearRect(0, 0, S, S);
+    if (fill >= END) { ctx.drawImage(full, 0, 0, S, S); return; }
+    ctx.drawImage(empty, 0, 0, S, S);
+    if (fill <= 0) return;
+    var a = A0 + 2 * Math.PI * fill;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(C, C);
+    ctx.arc(C, C, R + HALF + 2, A0, a);
+    ctx.closePath();
+    ctx.moveTo(C + HALF + 1, C - R);
+    ctx.arc(C, C - R, HALF + 1, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(full, 0, 0, S, S);
+    ctx.restore();
+    ctx.fillStyle = colourAt(fill);
+    ctx.beginPath();
+    ctx.arc(C + R * Math.cos(a), C + R * Math.sin(a), HALF, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function ready() {
+    draw(0);
+    img.replaceWith(canvas);
+    var go = function () {
+      var t0 = null, dur = 1600;
+      requestAnimationFrame(function frame(now) {
+        if (t0 === null) t0 = now;
+        var p = Math.min((now - t0) / dur, 1);
+        draw(p < 1 ? END * (1 - Math.pow(1 - p, 3)) : END);
+        if (p < 1) requestAnimationFrame(frame);
+      });
+    };
+    if (document.readyState === "complete") setTimeout(go, 300);
+    else addEventListener("load", function () { setTimeout(go, 300); });
+  }
+})();
+</script>
 <h1>Stop The Rot</h1>
 <p class="lede">Take back control of your screen time.</p>
-<p class="meta tagline">Private by design. Your usage never leaves your iPhone.</p>
+<p class="tagline">Private by design. Your usage never leaves your iPhone.</p>
 
 <p><a class="badge" id="download" href="https://apps.apple.com/app/id6771123703"><img src="app-store-badge.svg" alt="Download on the App Store" width="162" height="54" onerror="this.parentNode.className='button';this.parentNode.textContent='Download on the App Store'"></a></p>
 <script>
@@ -51,7 +114,6 @@ footer a{color:var(--mute)}
   }
 })();
 </script>
-<p class="meta">Free · iPhone · iOS 26.4 or later</p>
 
 <p class="label">What It Does</p>
 <div class="card"><h3>Group Daily Limit</h3><p>One shared daily allowance across the apps and websites you choose, with warnings 10 and 5 minutes before the block.</p></div>
@@ -59,7 +121,6 @@ footer a{color:var(--mute)}
 <div class="card"><h3>Blocked Hours</h3><p>Block apps outright during the hours you want to protect, whatever your limits say.</p></div>
 <div class="card"><h3>Daily Goals</h3><p>Set time you want to spend in apps that are good for you, like reading or meditation.</p></div>
 <div class="card"><h3>Patterns</h3><p>See when you use your phone most, how often you pick it up, and which apps interrupt you.</p></div>
-<div class="card"><h3>Private by Design</h3><p>Your usage stays on your iPhone. Nothing is collected, shared or sent anywhere.</p></div>
 
 <footer>Stop The Rot for iPhone · <a href="support.html">Support</a> · <a href="privacy.html">Privacy Policy</a></footer>
 </div></body></html>
